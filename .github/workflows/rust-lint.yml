@@ -1,0 +1,135 @@
+name: Rust Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - Cargo.*
+      - crates/**
+      - rustfmt.toml
+      - .github/workflows/rust-lint.yml
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  rustfmt:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { channel: stable, os: windows-2022 }
+          - { channel: stable, os: ubuntu-22.04 }
+
+    name: Rustfmt (${{ matrix.channel }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.channel }}
+          components: rustfmt
+
+      - name: Rustfmt
+        run: cargo fmt --all -- --check
+
+  clippy:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2022 }
+          - { channel: stable, target-triple: x86_64-apple-darwin, os: macos-12 }
+          - { channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-22.04 }
+
+    name: Clippy (${{ matrix.channel }}-${{ matrix.target-triple }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.channel }}
+          targets: ${{ matrix.target-triple }}
+          components: clippy
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo-clippy
+        run: cargo +${{ matrix.channel }} clippy --all-targets --target ${{ matrix.target-triple }} -- -D warnings
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2019 }
+          - { channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2022 }
+          - { channel: stable, target-triple: x86_64-apple-darwin, os: macos-11 }
+          - { channel: stable, target-triple: x86_64-apple-darwin, os: macos-12 }
+          - { channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
+          - { channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-22.04 }
+
+    name: Build (${{ matrix.channel }}-${{ matrix.target-triple }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.channel }}
+          targets: ${{ matrix.target-triple }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: cargo-build
+        run: cargo +${{ matrix.channel }} build --target ${{ matrix.target-triple }} -p voicevox_runtime
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2019 }
+          - { channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2022 }
+          - { channel: stable, target-triple: x86_64-apple-darwin, os: macos-11 }
+          - { channel: stable, target-triple: x86_64-apple-darwin, os: macos-12 }
+          - { channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
+          - { channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-22.04 }
+
+    name: Clippy (${{ matrix.channel }}-${{ matrix.target-triple }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.channel }}
+          targets: ${{ matrix.target-triple }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: cargo-test
+        run: cargo +${{ matrix.channel }} test --target ${{ matrix.target-triple }}
+        env:
+          RUST_BACKTRACE: full
