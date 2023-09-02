@@ -1,0 +1,9 @@
+[package]
+name = "voicevox_runtime"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+publish = false # not yet
+
+[lib]
+crate-type = ["cdylib", "rlib"]
