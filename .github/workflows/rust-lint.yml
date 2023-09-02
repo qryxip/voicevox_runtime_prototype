@@ -28,6 +28,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Disable `core.autocrlf`
+        run: git config --global core.autocrlf false
+        if: ${{ runner.os == 'Windows' }}
+
       - name: Checkout
         uses: actions/checkout@v3
 
