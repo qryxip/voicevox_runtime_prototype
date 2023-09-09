@@ -71,7 +71,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: cargo-clippy
-        run: cargo +${{ matrix.channel }} clippy --all-targets --target ${{ matrix.target-triple }} -- -D warnings
+        run: cargo clippy --all-targets --target ${{ matrix.target-triple }} -- -D warnings
 
   build:
     strategy:
@@ -111,7 +111,7 @@ jobs:
           key: ${{ matrix.os }}
 
       - name: cargo-build
-        run: cargo +${{ matrix.channel }} build --target ${{ matrix.target-triple }} -p voicevox_runtime
+        run: cargo build --target ${{ matrix.target-triple }} -p voicevox_runtime
 
   test:
     strategy:
@@ -145,6 +145,6 @@ jobs:
           key: ${{ matrix.os }}
 
       - name: cargo-test
-        run: cargo +${{ matrix.channel }} test --target ${{ matrix.target-triple }}
+        run: cargo test --target ${{ matrix.target-triple }}
         env:
           RUST_BACKTRACE: full
