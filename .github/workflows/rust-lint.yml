@@ -73,46 +73,6 @@ jobs:
       - name: cargo-clippy
         run: cargo clippy --all-targets --target ${{ matrix.target-triple }} -- -D warnings
 
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { artifact-name: windows-x64-cpu, channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2019 }
-          - { artifact-name: windows-x64-directml, channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2019 }
-          - { artifact-name: windows-x64-cuda, channel: stable, target-triple: x86_64-pc-windows-msvc, os: windows-2019 }
-          - { artifact-name: windows-x86-cpu, channel: stable, target-triple: i686-pc-windows-msvc, os: windows-2019 }
-          - { artifact-name: linux-x64-cpu, channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
-          - { artifact-name: linux-x64-gpu, channel: stable, target-triple: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
-          - { artifact-name: linux-arm64-cpu, channel: stable, target-triple: aarch64-unknown-linux-gnu, os: ubuntu-20.04 }
-          - { artifact-name: android-arm64-cpu, channel: stable, target-triple: aarch64-linux-android, os: ubuntu-20.04 }
-          - { artifact-name: android-x86_64-cpu, channel: stable, target-triple: x86_64-linux-android, os: ubuntu-20.04 }
-          - { artifact-name: osx-arm64-cpu, channel: stable, target-triple: aarch64-apple-darwin, os: macos-11 }
-          - { artifact-name: osx-x64-cpu, channel: stable, target-triple: x86_64-apple-darwin, os: macos-11 }
-          - { artifact-name: ios-arm64-cpu, channel: stable, target-triple: aarch64-apple-ios, os: macos-12 }
-          - { artifact-name: ios-arm64-cpu-sim, channel: stable, target-triple: aarch64-apple-ios-sim, os: macos-12 }
-          - { artifact-name: ios-x64-cpu, channel: stable, target-triple: x86_64-apple-ios, os: macos-12 }
-
-    name: Build (${{ matrix.channel }}-${{ matrix.target-triple }}, ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.channel }}
-          targets: ${{ matrix.target-triple }}
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.os }}
-
-      - name: cargo-build
-        run: cargo build --target ${{ matrix.target-triple }} -p voicevox_runtime
-
   test:
     strategy:
       fail-fast: false
